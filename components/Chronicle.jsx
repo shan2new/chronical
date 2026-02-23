@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useId } from "react";
 import {
   Activity, FileText, Pill, FlaskConical, Upload, Plus,
   ChevronRight, Calendar, MapPin, ArrowLeft,
@@ -97,6 +97,52 @@ const TH = {
 
 // ─── Hooks & Micro Components ────────────────────────────────────────────────
 
+function hexToRgb(hex) {
+  const n = Number.parseInt(hex.slice(1), 16);
+  return [n >> 16, (n >> 8) & 0xff, n & 0xff];
+}
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map((x) => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, "0")).join("");
+}
+function darker(hex, f = 0.82) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHex(r * f, g * f, b * f);
+}
+function lighter(hex, f = 0.22) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgbToHex(r + (255 - r) * f, g + (255 - g) * f, b + (255 - b) * f);
+}
+
+function BrandLogo({ size = 24, color = "#ea580c", style }) {
+  const id = useId();
+  // Tight viewBox crops to text bounds (no empty space): text centered at 60 in original 0..120, ~20–100
+  const vbMinX = 18;
+  const vbMinY = 10;
+  const vbW = 84;
+  const vbH = 18;
+  const w = Math.round((size * vbW) / vbH);
+  const shadow = darker(color);
+  const highlight = lighter(color);
+  const filterId = `emboss-${id.replace(/:/g, "")}`;
+  return (
+    <svg width={w} height={size} viewBox={`${vbMinX} ${vbMinY} ${vbW} ${vbH}`} fill="none" style={style} role="img" aria-label="Chronicle">
+      <defs>
+        <filter id={filterId} x="-15%" y="-15%" width="130%" height="130%">
+          <feOffset in="SourceAlpha" dx="0.25" dy="0.25" result="shadow" />
+          <feFlood floodColor={shadow} result="shadowColor" />
+          <feComposite in="shadowColor" in2="shadow" operator="in" result="shadowFill" />
+          <feOffset in="SourceAlpha" dx="-0.25" dy="-0.25" result="highlight" />
+          <feFlood floodColor={highlight} result="highlightColor" />
+          <feComposite in="highlightColor" in2="highlight" operator="in" result="highlightFill" />
+          <feBlend in="shadowFill" in2="SourceGraphic" mode="normal" result="withShadow" />
+          <feBlend in="highlightFill" in2="withShadow" mode="normal" />
+        </filter>
+      </defs>
+      <text x="60" y="25" textAnchor="middle" fill={color} fontFamily="var(--serif)" fontSize="18" fontWeight="600" filter={`url(#${filterId})`}>chronicle.</text>
+    </svg>
+  );
+}
+
 function useStagger(n, base = 55) {
   const [v, setV] = useState(false);
   useEffect(() => {
@@ -139,74 +185,6 @@ function Pressable({ children, style, onClick }) {
       }}
     >
       {children}
-    </div>
-  );
-}
-
-// ─── Splash Screen ───────────────────────────────────────────────────────────
-
-function SplashScreen({ onDone }) {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setVisible(false), 1400);
-    const t2 = setTimeout(onDone, 1900);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [onDone]);
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "#faf8f5",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: visible ? 1 : 0,
-        transition: "opacity 0.5s ease",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          opacity: visible ? 1 : 0,
-          transform: visible ? "scale(1)" : "scale(0.96)",
-          transition: "opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s",
-        }}
-      >
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            background: "#fff3ed",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Sparkles size={22} style={{ color: "#ea580c" }} />
-        </div>
-        <span
-          style={{
-            fontFamily: "var(--serif)",
-            fontSize: 28,
-            fontWeight: 700,
-            color: "#1c1917",
-            letterSpacing: -0.8,
-          }}
-        >
-          Chronicle
-        </span>
-      </div>
     </div>
   );
 }
@@ -272,21 +250,8 @@ function LoginScreen({ onLogin }) {
         }}
       >
         {/* Brand mark */}
-        <div style={{ ...stagger(0), marginBottom: 48 }}>
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 17,
-              background: "#fff3ed",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 28,
-            }}
-          >
-            <Sparkles size={24} style={{ color: "#ea580c" }} />
-          </div>
+        <div style={{ ...stagger(0), marginBottom: 48, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <BrandLogo size={56} color="#ea580c" style={{ marginBottom: 28 }} />
           <h1
             style={{
               fontFamily: "var(--serif)",
@@ -1803,7 +1768,7 @@ const TABS = [
 ];
 
 export default function Chronicle() {
-  const [appState, setAppState] = useState("splash");
+  const [appState, setAppState] = useState("login");
   const [page, setPage] = useState("home");
   const [dark, setDark] = useState(false);
   const [cond, setCond] = useState(null);
@@ -1812,7 +1777,6 @@ export default function Chronicle() {
   const scrollRef = useRef(null);
   const t = dark ? TH.dark : TH.light;
 
-  const onSplashDone = useCallback(() => setAppState("login"), []);
   const onLogin = useCallback(() => setAppState("app"), []);
   const onLogout = useCallback(() => {
     setAppState("login");
@@ -1881,9 +1845,6 @@ export default function Chronicle() {
         @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
       `}</style>
 
-      {/* Splash */}
-      {appState === "splash" && <SplashScreen onDone={onSplashDone} />}
-
       {/* Login */}
       {appState === "login" && <LoginScreen onLogin={onLogin} />}
 
@@ -1915,31 +1876,8 @@ export default function Chronicle() {
             }}
           >
             {showHeader ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 9,
-                    background: t.brandSoft,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Sparkles size={14} style={{ color: t.brand }} />
-                </div>
-                <span
-                  style={{
-                    fontFamily: "var(--serif)",
-                    fontSize: 17,
-                    fontWeight: 600,
-                    color: t.textSec,
-                    letterSpacing: -0.2,
-                  }}
-                >
-                  Chronicle
-                </span>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <BrandLogo size={24} color={t.brand} />
               </div>
             ) : (
               <div />
