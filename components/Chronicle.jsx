@@ -2,13 +2,13 @@
 
 import { useState, useCallback, useRef, useEffect, useId } from "react";
 import {
-  Activity, FileText, Pill, FlaskConical, Upload, Plus,
-  ChevronRight, Calendar, MapPin, ArrowLeft,
-  CheckCircle2, TrendingUp, TrendingDown, Minus,
-  Stethoscope, Zap, Moon, Sun, Heart,
-  Clock, ChevronDown, ChevronUp, AlertCircle,
-  Sparkles, ArrowRight, Eye, EyeOff, LogOut
-} from "lucide-react";
+  Pulse, FileText, Pill, Flask, Upload, Plus,
+  CaretRight, Calendar, MapPin, ArrowLeft,
+  CheckCircle, TrendUp, TrendDown, Minus,
+  Stethoscope, Lightning, Moon, Sun, Heart,
+  Clock, CaretDown, CaretUp, WarningCircle,
+  Sparkle, ArrowRight, Eye, EyeSlash, SignOut
+} from "@phosphor-icons/react";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -47,10 +47,10 @@ const LAB_RESULTS = [
 ];
 
 const INSIGHTS = [
-  { id: "i1", icon: AlertCircle, title: "Follow-up overdue", body: "Dr. Sharma asked for a 6-week follow-up after your Dec visit. That was 11 weeks ago.", action: "Schedule visit", color: { light: { bg: "#fef2f2", border: "#fecaca", text: "#991b1b", icon: "#ef4444" }, dark: { bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.12)", text: "#fca5a5", icon: "#f87171" } } },
-  { id: "i2", icon: TrendingUp, title: "Vitamin D — still below range", body: "18 → 24 → 22 ng/mL over three tests. Trending better but last reading dipped. Recheck due this month.", action: "View trend", color: { light: { bg: "#fffbeb", border: "#fed7aa", text: "#92400e", icon: "#f59e0b" }, dark: { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.1)", text: "#fbbf24", icon: "#f59e0b" } } },
-  { id: "i3", icon: Sparkles, title: "2.8 years on Escitalopram", body: "You've been stable. Worth discussing tapering with Dr. Sharma at your next visit.", action: null, color: { light: { bg: "#f0fdf4", border: "#bbf7d0", text: "#166534", icon: "#22c55e" }, dark: { bg: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.1)", text: "#86efac", icon: "#22c55e" } } },
-  { id: "i4", icon: CheckCircle2, title: "CBC, TSH, HbA1c all clear", body: "November blood work came back normal. No action needed.", action: null, color: { light: { bg: "#faf9f7", border: "#e7e5e0", text: "#57534e", icon: "#a8a29e" }, dark: { bg: "rgba(168,162,158,0.05)", border: "rgba(168,162,158,0.08)", text: "#a8a29e", icon: "#78716c" } } },
+  { id: "i1", icon: WarningCircle, title: "Follow-up overdue", body: "Dr. Sharma asked for a 6-week follow-up after your Dec visit. That was 11 weeks ago.", action: "Schedule visit", color: { light: { bg: "#fef2f2", border: "#fecaca", text: "#991b1b", icon: "#ef4444" }, dark: { bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.12)", text: "#fca5a5", icon: "#f87171" } } },
+  { id: "i2", icon: TrendUp, title: "Vitamin D — still below range", body: "18 → 24 → 22 ng/mL over three tests. Trending better but last reading dipped. Recheck due this month.", action: "View trend", color: { light: { bg: "#fffbeb", border: "#fed7aa", text: "#92400e", icon: "#f59e0b" }, dark: { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.1)", text: "#fbbf24", icon: "#f59e0b" } } },
+  { id: "i3", icon: Sparkle, title: "2.8 years on Escitalopram", body: "You've been stable. Worth discussing tapering with Dr. Sharma at your next visit.", action: null, color: { light: { bg: "#f0fdf4", border: "#bbf7d0", text: "#166534", icon: "#22c55e" }, dark: { bg: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.1)", text: "#86efac", icon: "#22c55e" } } },
+  { id: "i4", icon: CheckCircle, title: "CBC, TSH, HbA1c all clear", body: "November blood work came back normal. No action needed.", action: null, color: { light: { bg: "#faf9f7", border: "#e7e5e0", text: "#57534e", icon: "#a8a29e" }, dark: { bg: "rgba(168,162,158,0.05)", border: "rgba(168,162,158,0.08)", text: "#a8a29e", icon: "#78716c" } } },
 ];
 
 // ─── Utils ───────────────────────────────────────────────────────────────────
@@ -69,9 +69,9 @@ const statusMeta = {
   resolved: { label: "Resolved", light: { dot: "#a8a29e", text: "#78716c" }, dark: { dot: "#78716c", text: "#a8a29e" } },
 };
 const flagMeta = {
-  low: { icon: TrendingDown, light: { color: "#b45309", bg: "#fef3c7" }, dark: { color: "#fbbf24", bg: "rgba(245,158,11,0.1)" } },
-  high: { icon: TrendingUp, light: { color: "#b91c1c", bg: "#fee2e2" }, dark: { color: "#fca5a5", bg: "rgba(239,68,68,0.1)" } },
-  normal: { icon: CheckCircle2, light: { color: "#047857", bg: "#d1fae5" }, dark: { color: "#6ee7b7", bg: "rgba(16,185,129,0.1)" } },
+  low: { icon: TrendDown, light: { color: "#b45309", bg: "#fef3c7" }, dark: { color: "#fbbf24", bg: "rgba(245,158,11,0.1)" } },
+  high: { icon: TrendUp, light: { color: "#b91c1c", bg: "#fee2e2" }, dark: { color: "#fca5a5", bg: "rgba(239,68,68,0.1)" } },
+  normal: { icon: CheckCircle, light: { color: "#047857", bg: "#d1fae5" }, dark: { color: "#6ee7b7", bg: "rgba(16,185,129,0.1)" } },
 };
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
@@ -327,7 +327,7 @@ function LoginScreen({ onLogin }) {
                   display: "flex",
                 }}
               >
-                {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPass ? <EyeSlash size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
@@ -561,7 +561,7 @@ function UploadSheet({ open, onClose, t, dark }) {
                 marginBottom: 20,
               }}
             >
-              <Zap
+              <Lightning
                 size={24}
                 style={{ color: t.textSec, animation: "pulse 1s ease-in-out infinite" }}
               />
@@ -605,7 +605,7 @@ function UploadSheet({ open, onClose, t, dark }) {
                   marginBottom: 24,
                 }}
               >
-                <CheckCircle2 size={16} style={{ color: t.emerald.text, flexShrink: 0 }} />
+                <CheckCircle size={16} style={{ color: t.emerald.text, flexShrink: 0 }} />
                 <p style={{ fontSize: 13, color: t.emerald.text }}>
                   Extracted visit details and 1 medication
                 </p>
@@ -686,7 +686,7 @@ function UploadSheet({ open, onClose, t, dark }) {
                 }}
               >
                 {more ? "Less" : "More details"}{" "}
-                {more ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                {more ? <CaretUp size={14} /> : <CaretDown size={14} />}
               </button>
               {more && (
                 <div
@@ -1084,7 +1084,7 @@ function VitaHome({ t, dark, onNav, userName, onLogout }) {
               gap: 2,
             }}
           >
-            All <ChevronRight size={12} />
+            All <CaretRight size={12} />
           </button>
         </div>
         <div
@@ -1227,7 +1227,7 @@ function HealthPage({ t, dark, onSelect }) {
                       {vc} visits · Since {fmtShort(c.diagnosed)}
                     </div>
                   </div>
-                  <ChevronRight size={16} style={{ color: t.textMut }} />
+                  <CaretRight size={16} style={{ color: t.textMut }} />
                 </Pressable>
               );
             })}
@@ -1762,7 +1762,7 @@ function RecordsPage({ t, dark }) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "home", label: "Home", icon: Sparkles },
+  { id: "home", label: "Home", icon: Sparkle },
   { id: "health", label: "Health", icon: Heart },
   { id: "records", label: "Records", icon: Clock },
 ];
@@ -1917,7 +1917,7 @@ export default function Chronicle() {
                   cursor: "pointer",
                 }}
               >
-                <LogOut size={16} style={{ color: t.textTer }} />
+                <SignOut size={16} style={{ color: t.textTer }} />
               </button>
             </div>
           </div>
